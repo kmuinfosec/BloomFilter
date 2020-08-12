@@ -4,9 +4,8 @@ import hashlib
 
 class BloomFilter:
     def __init__(self, number_of_elements=100, fp_prob=0.01):
-        temp = self.__calculate_filter_size(number_of_elements, fp_prob)
-        self.filter_size = 1 << math.ceil(math.log2(temp))
-        self.__mod_value = self.filter_size - 1
+        self.filter_size = self.__calculate_filter_size(number_of_elements, fp_prob)
+        self.__mod_value = (1 << self.filter_size) - 1
         self.number_of_hashes = self.__calculate_number_of_hashes(self.filter_size, number_of_elements)
         self.__slice = math.ceil(math.log2(self.filter_size))
         self.filter = 0
@@ -24,7 +23,8 @@ class BloomFilter:
         while i < self.number_of_hashes:
             idx = int(hashlib.blake2b(data + '{}'.format(i).encode()).hexdigest(), 16)
             for j in range(0, 512, self.__slice):
-                self.filter |= (idx & self.__mod_value)
+                temp = idx & self.__mod_value
+                self.filter |= (temp % self.filter_size)
                 i += 1
                 idx >>= self.__slice
 
@@ -33,7 +33,8 @@ class BloomFilter:
         while i < self.number_of_hashes:
             idx = int(hashlib.blake2b(data + '{}'.format(i).encode()).hexdigest(), 16)
             for j in range(0, 512, self.__slice):
-                self.filter |= (idx & self.__mod_value)
+                temp = idx & self.__mod_value
+                self.filter |= (temp % self.filter_size)
                 i += 1
                 idx >>= self.__slice
         return True
