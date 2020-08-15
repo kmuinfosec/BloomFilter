@@ -19,7 +19,7 @@ class BloomFilter:
 
     def add(self, data):
         i = 0
-        while i < self.number_of_hashes:
+        while True:
             idx = int(hashlib.blake2b(data + '{}'.format(i).encode()).hexdigest(), 16)
             for j in range(0, 512, self.slice):
                 temp = idx & self.mod_value
@@ -28,11 +28,15 @@ class BloomFilter:
                 bin_idx, bit_idx = divmod(temp, 64)
                 self.bins[bin_idx] |= (1 << bit_idx)
                 i += 1
+                if i == self.number_of_hashes:
+                    break
                 idx >>= self.slice
+            if i == self.number_of_hashes:
+                break
 
     def check(self, data):
         i = 0
-        while i < self.number_of_hashes:
+        while True:
             idx = int(hashlib.blake2b(data + '{}'.format(i).encode()).hexdigest(), 16)
             for j in range(0, 512, self.slice):
                 temp = idx & self.mod_value
@@ -42,7 +46,11 @@ class BloomFilter:
                 if (self.bins[bin_idx] >> bit_idx) & 1 == 0:
                     return False
                 i += 1
+                if i == self.number_of_hashes:
+                    break
                 idx >>= self.slice
+            if i == self.number_of_hashes:
+                break
         return True
 
     def __str__(self):
