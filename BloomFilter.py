@@ -15,7 +15,7 @@ class BloomFilter:
 
     @classmethod
     def __calculate_number_of_hashes(cls, filter_size, number_of_elements):
-        return int(math.ceil((filter_size / number_of_elements) * math.log(2)))
+        return int(math.floor((filter_size / number_of_elements) * math.log(2)))
 
     def add(self, data):
         i = 0
